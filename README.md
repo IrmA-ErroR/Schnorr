@@ -1,6 +1,6 @@
 # Schnorr
-Implementation of authentication according to the Klaus Schnorr scheme for 3 users.
+Implementation of Klaus Schnorr authentication scheme for 3 users (Alice, Bob and Claus).
 
-Desktop application Pothon **tkinter**
+Desktop application on Python using **tkinter**
 
 *Technical task: do not use random*
