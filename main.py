@@ -1,132 +1,43 @@
 import tkinter as tk
-from get_primes import PrimeGenerator
-from get_secret import find_g, get_x, find_y
+from tkinter import ttk
+from alice_window import AliceWindow
+from bob_window import BobWindow
+from claus_window import ClausWindow
+from work_window import WorkWindow
 
 class MainWindow:
     def __init__(self, master):
         self.master = master
-        self.master.title("Главное окно")
-        self.master.geometry("500x450")  # Задаем размеры главного окна
-        self.prime_generator = None  # Здесь будет объект PrimeGenerator
-        self.p = None
-        self.q = None
-        self.used_gs = set()
-        self.used_xs = set()
-        self.prime_difference = 11
+        master.title("Основное окно")
+        master.geometry("400x300")
 
-        tk.Button(self.master, text="Старт", font=("Arial", 16), command=self.generate_primes).pack(side=tk.TOP, pady=10)
+        # Кнопка для открытия окон Alice, Bob, Claus и Work
+        self.start_button = ttk.Button(master, text="Start", command=self.open_windows, style="Start.TButton")
+        self.start_button.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
 
-    def generate_primes(self):
-        num_digits = 5
-        shift = 100
+        # Добавление стилей
+        ttk.Style().configure("Start.TButton", background="green", font=("Arial", 14))
 
-        self.prime_generator = PrimeGenerator(num_digits, shift)
-        self.p, self.q = self.prime_generator.generate_prime(shift)
+    def open_windows(self):
+        self.master.withdraw()
 
-        self.display_primes()
-        self.create_windows()
+        # Создаем и открываем окна Alice, Bob, Claus и Work
+        alice_window = AliceWindow(self.master, self)
+        alice_window.show()
 
-    def display_primes(self):
-        # Очистка предыдущих значений
-        for widget in self.master.winfo_children():
-            if isinstance(widget, tk.Toplevel):
-                self.update_window_content(widget)
-            else:
-                widget.destroy()
+        bob_window = BobWindow(self.master, self)
+        bob_window.show()
 
-        # Отображение новых значений
-        self.p_label = tk.Label(self.master, text=f"p = {self.p}", font=("Arial", 14))
-        self.p_label.pack(anchor="nw", padx=20)
+        claus_window = ClausWindow(self.master, self)
+        claus_window.show()
 
-        self.q_label = tk.Label(self.master, text=f"q = {self.q}", font=("Arial", 14))
-        self.q_label.pack(anchor="nw", padx=20)
+        self.work_window = WorkWindow(self.master, self)
+        self.work_window.show()
+ 
+    def show_hello_message(self, name, message):
+        # Метод для отображения сообщения от окна Alice, Bob, Claus или Work
+        self.work_window.show_hello_message(name, message)
 
-
-    def create_windows(self):
-        alice_window = self.create_window("Алиса", 101)
-        bob_window = self.create_window("Боб", 202)
-        claus_window = self.create_window("Клаус", 303)
-
-        self.master.update()
-
-    def create_window(self, title, prime_difference):
-        window = tk.Toplevel(self.master)
-        window.title(title)
-
-        x = get_x(self.q, self.used_xs, id=prime_difference)
-        g = find_g(self.q, self.p, prime_difference, self.used_gs)
-        y = find_y(self.q, self.p, g)
-
-        title_label = tk.Label(window, text=title, font=("Arial", 18, "bold"))
-        title_label.pack()
-
-        x_label_text = f"Закрытый ключ (x) = {x}"
-        x_label = tk.Label(window, text=x_label_text, font=("Arial", 14))
-        x_label.pack(anchor="nw", padx=20)
-
-        g_label_text = f"g = {g}"
-        g_label = tk.Label(window, text=g_label_text, font=("Arial", 14))
-        g_label.pack(anchor="nw", padx=20)
-
-        y_label_text = f"Открытый ключ (y) = {y}"
-        y_label = tk.Label(window, text=y_label_text, font=("Arial", 14))
-        y_label.pack(anchor="nw", padx=20)
-
-        # Установка размеров окна
-        window.geometry("500x400")
-
-        tk.Button(window, text="Отправить открытый ключ", font=("Arial", 16), command=lambda: self.send_signature(window, title, y)).pack(side=tk.BOTTOM, pady=10)
-        
-        return window
-    
-    def send_signature(self, window, sender, signature):
-        self.display_primes()
-
-        sender_label = tk.Label(self.master, text=f"Отправитель: {sender}", font=("Arial", 14))
-        sender_label.pack(anchor="nw", padx=20)
-
-        signature_label_text = f"Открытый ключ отправителя (y) = {signature}"
-        signature_label = tk.Label(self.master, text=signature_label_text, font=("Arial", 14))
-        signature_label.pack(anchor="nw", padx=20)
-
-        window.withdraw()
-
-    def update_window_content(self, window):
-        for widget in window.winfo_children():
-            widget.destroy()
-
-        title = window.title()
-        prime_difference = 11  # Ваш код для получения prime_difference из title
-
-        x = get_x(self.q, self.used_xs, id=prime_difference)
-        g = find_g(self.q, self.p, prime_difference, self.used_gs)
-        y = find_y(self.q, self.p, g)
-
-        title_label = tk.Label(window, text=title, font=("Arial", 18, "bold"))
-        title_label.pack()
-
-        x_label_text = f"Закрытый ключ (x) = {x}"
-        x_label = tk.Label(window, text=x_label_text, font=("Arial", 14))
-        x_label.pack(anchor="nw", padx=20)
-
-        g_label_text = f"g = {g}"
-        g_label = tk.Label(window, text=g_label_text, font=("Arial", 14))
-        g_label.pack(anchor="nw", padx=20)
-
-        y_label_text = f"Открытый ключ (y) = {y}"
-        y_label = tk.Label(window, text=y_label_text, font=("Arial", 14))
-        y_label.pack(anchor="nw", padx=20)
-
-        tk.Button(window, text="Отправить подпись", font=("Arial", 16), command=lambda: self.send_signature(window, title, y)).pack(side=tk.BOTTOM, pady=10)
-
-    def send_signature(self, window, sender, signature):
-        self.display_primes()
-
-        info_label_text = f"Отправитель: {sender}, Открытый ключ (y): {signature}"
-        info_label = tk.Label(self.master, text=info_label_text, font=("Arial", 14))
-        info_label.pack(anchor="nw", padx=20)
-
-        window.withdraw()  # Скрыть окно, но не закрывать
 
 if __name__ == "__main__":
     root = tk.Tk()
